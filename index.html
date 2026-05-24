@@ -11,9 +11,7 @@
 <body>
 <div id="root"></div>
 <script type="text/babel" data-presets="react">
-
 const { useState, useEffect } = React;
-
 
 // --- SUPABASE CONFIG ---
 const SUPABASE_URL = "https://alncohvoaqoxahbdwhnv.supabase.co";
@@ -564,10 +562,10 @@ function App() {
             <HomeView currentUser={currentUser} />
           )}
           {view === "restaurants" && (
-            <RestaurantsView restaurants={filteredRests} allRestaurants={RESTAURANTS_DATA} visits={filteredVisits} actions={filteredActions} searchQ={searchQ} setSearchQ={setSearchQ} managerFilter={managerFilter} setManagerFilter={setManagerFilter} managers={managers} isAdmin={currentUser.role === "admin"} onRestClick={handleRestClick} onGoToActions={() => setView("actions")} onGoToVisits={() => setView("visits")} />
+            <RestaurantsView restaurants={filteredRests} allRestaurants={restaurants} visits={filteredVisits} actions={filteredActions} searchQ={searchQ} setSearchQ={setSearchQ} managerFilter={managerFilter} setManagerFilter={setManagerFilter} managers={managers} isAdmin={currentUser.role === "admin"} onRestClick={handleRestClick} onGoToActions={() => setView("actions")} onGoToVisits={() => setView("visits")} />
           )}
           {view === "visits" && (
-            <AllVisitsView visits={filteredVisits} restaurants={RESTAURANTS_DATA} onRestClick={handleRestClick} />
+            <AllVisitsView visits={filteredVisits} restaurants={restaurants} onRestClick={handleRestClick} />
           )}
           {view === "actions" && (
             <ActionsView actions={filteredActions} restaurants={restaurants} statusFilter={actionStatusFilter} setStatusFilter={setActionStatusFilter} onUpdateStatus={updateActionStatus} onDelete={handleDeleteAction} onEdit={(a) => { setEditingAction(a); setSelectedRestId(a.restaurantId); setShowActionForm(true); }} onRestClick={handleRestClick} />
