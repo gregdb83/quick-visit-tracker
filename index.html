@@ -341,8 +341,9 @@ function LoginScreen({ onLogin }) {
 
   const handleLogin = () => {
     if (!selectedUser) { setError("Veuillez sélectionner un utilisateur."); return; }
-    if (password !== "quick2024") { setError("Mot de passe incorrect."); return; }
     const user = USERS.find(u => u.id === selectedUser);
+    const expectedPwd = user?.id === "admin" ? "Quick234" : "quick2024";
+    if (password !== expectedPwd) { setError("Mot de passe incorrect."); return; }
     onLogin(user);
   };
 
@@ -367,7 +368,6 @@ function LoginScreen({ onLogin }) {
         <div style={{ marginTop: 20 }}>
           <button className="btn-primary" onClick={handleLogin}>Se connecter</button>
         </div>
-        <div style={{ marginTop: 12, fontSize: 12, color: "#999", textAlign: "center" }}>Mot de passe demo : quick2024</div>
       </div>
     </div>
   );
