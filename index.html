@@ -6,18 +6,11 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Quick Visites">
-<meta name="application-name" content="Quick Visites">
+<meta name="apple-mobile-web-app-title" content="Q ops">
 <meta name="theme-color" content="#E30613">
-<meta name="description" content="Suivi des visites restaurants Quick">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon.png">
-<style>
-  * { -webkit-tap-highlight-color: transparent; }
-  body { overscroll-behavior: none; }
-</style>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Quick - Suivi Visites</title>
+<title>Q ops</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
@@ -312,7 +305,7 @@ const JOKES = [
   "Qu'est-ce qu'un chameau sans bosse ? Un chameau vide !",
 ];
 
-function HomeView({ currentUser }) {
+function HomeView({ currentUser, onNavigate }) {
   const dayIndex = (arr) => { const d = new Date(); return Math.floor(d.getTime() / 86400000) % arr.length; };
   const todayQuote = QUOTES[dayIndex(QUOTES)];
   const todayJoke = JOKES[dayIndex(JOKES)];
@@ -334,8 +327,10 @@ function HomeView({ currentUser }) {
         <div className="card-body">
           <div style={{ fontSize: 11, fontWeight: 700, color: "#999", textTransform: "uppercase", letterSpacing: "0.8px", marginBottom: 12 }}>🚀 Navigation rapide</div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-            {[["🍔","Restaurants","Vos restaurants"],["📋","Visites","Historique"],["✅","Actions","Plans d'action"],["📊","Rapport","Performances"]].map(([emoji, label, desc]) => (
-              <div key={label} style={{ background: "#f9f9f9", borderRadius: 10, padding: "14px 12px", border: "1.5px solid #eee" }}>
+            {[["🍔","Restaurants","Vos restaurants","restaurants"],["📋","Visites","Historique","visits"],["✅","Actions","Plans d'action","actions"],["📊","Rapport","Performances","rapport"]].map(([emoji, label, desc, view]) => (
+              <div key={label} onClick={() => onNavigate(view)} style={{ background: "#f9f9f9", borderRadius: 10, padding: "14px 12px", border: "1.5px solid #eee", cursor: "pointer", transition: "all 0.15s" }}
+                onMouseEnter={e => { e.currentTarget.style.background="#fff0f0"; e.currentTarget.style.borderColor="#E30613"; }}
+                onMouseLeave={e => { e.currentTarget.style.background="#f9f9f9"; e.currentTarget.style.borderColor="#eee"; }}>
                 <div style={{ fontSize: 24, marginBottom: 6 }}>{emoji}</div>
                 <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 16, fontWeight: 800 }}>{label}</div>
                 <div style={{ fontSize: 12, color: "#999", marginTop: 2 }}>{desc}</div>
@@ -573,7 +568,7 @@ function App() {
         
         <main className="main">
           {view === "home" && (
-            <HomeView currentUser={currentUser} />
+            <HomeView currentUser={currentUser} onNavigate={setView} />
           )}
           {view === "restaurants" && (
             <RestaurantsView restaurants={filteredRests} allRestaurants={restaurants} visits={filteredVisits} actions={filteredActions} searchQ={searchQ} setSearchQ={setSearchQ} managerFilter={managerFilter} setManagerFilter={setManagerFilter} managers={managers} isAdmin={currentUser.role === "admin"} onRestClick={handleRestClick} onGoToActions={() => setView("actions")} onGoToVisits={() => setView("visits")} />
