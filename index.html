@@ -343,22 +343,44 @@ function HomeView({ currentUser, onNavigate, visits, restaurants }) {
         <div style={{ fontSize: 14, opacity: 0.9, fontStyle: "italic", lineHeight: 1.6, borderTop: "1px solid rgba(255,255,255,0.2)", paddingTop: 12 }}>"{todayQuote}"</div>
       </div>
 
+      <div className="card" style={{ marginBottom: 16 }}>
+        <div className="card-body">
+          <div style={{ fontSize: 11, fontWeight: 700, color: "#999", textTransform: "uppercase", letterSpacing: "0.8px", marginBottom: 8 }}>😄 Blague du jour</div>
+          <div style={{ fontSize: 14, color: "#1a1a1a", lineHeight: 1.6 }}>{todayJoke}</div>
+        </div>
+      </div>
+
+      <div className="card" style={{ marginBottom: 16 }}>
+        <div className="card-body">
+          <div style={{ fontSize: 11, fontWeight: 700, color: "#999", textTransform: "uppercase", letterSpacing: "0.8px", marginBottom: 12 }}>🚀 Navigation rapide</div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+            {[["🍔","Restaurants","Vos restaurants","restaurants"],["📋","Visites","Historique","visits"],["✅","Actions","Plans d'action","actions"],["📊","Rapport","Performances","rapport"]].map(([emoji, label, desc, view]) => (
+              <div key={label} onClick={() => onNavigate(view)} style={{ background: "#f9f9f9", borderRadius: 10, padding: "14px 12px", border: "1.5px solid #eee", cursor: "pointer", transition: "all 0.15s" }}
+                onMouseEnter={e => { e.currentTarget.style.background="#fff0f0"; e.currentTarget.style.borderColor="#E30613"; }}
+                onMouseLeave={e => { e.currentTarget.style.background="#f9f9f9"; e.currentTarget.style.borderColor="#eee"; }}>
+                <div style={{ fontSize: 24, marginBottom: 6 }}>{emoji}</div>
+                <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 16, fontWeight: 800 }}>{label}</div>
+                <div style={{ fontSize: 12, color: "#999", marginTop: 2 }}>{desc}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
       {/* CALENDAR */}
       <div className="card" style={{ marginBottom: 16 }}>
         <div className="card-body" style={{ padding: "14px 16px" }}>
-          {/* Month navigation */}
+          <div style={{ fontSize: 11, fontWeight: 700, color: "#999", textTransform: "uppercase", letterSpacing: "0.8px", marginBottom: 12 }}>📅 Calendrier des visites</div>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
             <button className="btn-icon" onClick={() => setCalDate(new Date(year, month - 1, 1))}><Icon name="back" size={16} /></button>
             <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 17, fontWeight: 800, textTransform: "capitalize" }}>{monthLabel}</div>
             <button className="btn-icon" onClick={() => setCalDate(new Date(year, month + 1, 1))} style={{ transform: "rotate(180deg)" }}><Icon name="back" size={16} /></button>
           </div>
-          {/* Day headers */}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 2, marginBottom: 4 }}>
             {["Lu","Ma","Me","Je","Ve","Sa","Di"].map(d => (
               <div key={d} style={{ textAlign: "center", fontSize: 11, fontWeight: 700, color: "#999", padding: "4px 0" }}>{d}</div>
             ))}
           </div>
-          {/* Days grid */}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 2 }}>
             {Array.from({ length: startOffset }).map((_, i) => <div key={`e${i}`} />)}
             {Array.from({ length: daysInMonth }).map((_, i) => {
@@ -403,29 +425,6 @@ function HomeView({ currentUser, onNavigate, visits, restaurants }) {
           </div>
         </div>
       )}
-
-      <div className="card" style={{ marginBottom: 16 }}>
-        <div className="card-body">
-          <div style={{ fontSize: 11, fontWeight: 700, color: "#999", textTransform: "uppercase", letterSpacing: "0.8px", marginBottom: 8 }}>😄 Blague du jour</div>
-          <div style={{ fontSize: 14, color: "#1a1a1a", lineHeight: 1.6 }}>{todayJoke}</div>
-        </div>
-      </div>
-      <div className="card">
-        <div className="card-body">
-          <div style={{ fontSize: 11, fontWeight: 700, color: "#999", textTransform: "uppercase", letterSpacing: "0.8px", marginBottom: 12 }}>🚀 Navigation rapide</div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-            {[["🍔","Restaurants","Vos restaurants","restaurants"],["📋","Visites","Historique","visits"],["✅","Actions","Plans d'action","actions"],["📊","Rapport","Performances","rapport"]].map(([emoji, label, desc, view]) => (
-              <div key={label} onClick={() => onNavigate(view)} style={{ background: "#f9f9f9", borderRadius: 10, padding: "14px 12px", border: "1.5px solid #eee", cursor: "pointer", transition: "all 0.15s" }}
-                onMouseEnter={e => { e.currentTarget.style.background="#fff0f0"; e.currentTarget.style.borderColor="#E30613"; }}
-                onMouseLeave={e => { e.currentTarget.style.background="#f9f9f9"; e.currentTarget.style.borderColor="#eee"; }}>
-                <div style={{ fontSize: 24, marginBottom: 6 }}>{emoji}</div>
-                <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 16, fontWeight: 800 }}>{label}</div>
-                <div style={{ fontSize: 12, color: "#999", marginTop: 2 }}>{desc}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
