@@ -305,11 +305,36 @@ const JOKES = [
   "Qu'est-ce qu'un chameau sans bosse ? Un chameau vide !",
 ];
 
-function HomeView({ currentUser, onNavigate }) {
+function HomeView({ currentUser, onNavigate, visits, restaurants }) {
   const dayIndex = (arr) => { const d = new Date(); return Math.floor(d.getTime() / 86400000) % arr.length; };
   const todayQuote = QUOTES[dayIndex(QUOTES)];
   const todayJoke = JOKES[dayIndex(JOKES)];
   const today = new Date().toLocaleDateString("fr-BE", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+
+  const [calDate, setCalDate] = useState(new Date());
+  const [selectedDay, setSelectedDay] = useState(null);
+
+  const year = calDate.getFullYear();
+  const month = calDate.getMonth();
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const startOffset = firstDay === 0 ? 6 : firstDay - 1;
+  const monthLabel = calDate.toLocaleDateString("fr-BE", { month: "long", year: "numeric" });
+
+  const getRest = id => restaurants.find(r => r.id === id);
+
+  const visitsByDate = {};
+  visits.forEach(v => {
+    const d = v.date?.slice(0, 10);
+    if (!d) return;
+    if (!visitsByDate[d]) visitsByDate[d] = [];
+    visitsByDate[d].push(v);
+  });
+
+  const todayStr = new Date().toISOString().slice(0, 10);
+
+  const dayVisits = selectedDay ? (visitsByDate[selectedDay] || []) : [];
+
   return (
     <div>
       <div style={{ background: "linear-gradient(135deg, #E30613 0%, #B0000A 100%)", borderRadius: 16, padding: "28px 20px", marginBottom: 16, color: "#fff" }}>
@@ -317,6 +342,68 @@ function HomeView({ currentUser, onNavigate }) {
         <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 32, fontWeight: 900, lineHeight: 1.1, marginBottom: 12 }}>Bonjour {currentUser.firstName} ! 👋</div>
         <div style={{ fontSize: 14, opacity: 0.9, fontStyle: "italic", lineHeight: 1.6, borderTop: "1px solid rgba(255,255,255,0.2)", paddingTop: 12 }}>"{todayQuote}"</div>
       </div>
+
+      {/* CALENDAR */}
+      <div className="card" style={{ marginBottom: 16 }}>
+        <div className="card-body" style={{ padding: "14px 16px" }}>
+          {/* Month navigation */}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+            <button className="btn-icon" onClick={() => setCalDate(new Date(year, month - 1, 1))}><Icon name="back" size={16} /></button>
+            <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 17, fontWeight: 800, textTransform: "capitalize" }}>{monthLabel}</div>
+            <button className="btn-icon" onClick={() => setCalDate(new Date(year, month + 1, 1))} style={{ transform: "rotate(180deg)" }}><Icon name="back" size={16} /></button>
+          </div>
+          {/* Day headers */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 2, marginBottom: 4 }}>
+            {["Lu","Ma","Me","Je","Ve","Sa","Di"].map(d => (
+              <div key={d} style={{ textAlign: "center", fontSize: 11, fontWeight: 700, color: "#999", padding: "4px 0" }}>{d}</div>
+            ))}
+          </div>
+          {/* Days grid */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 2 }}>
+            {Array.from({ length: startOffset }).map((_, i) => <div key={`e${i}`} />)}
+            {Array.from({ length: daysInMonth }).map((_, i) => {
+              const day = i + 1;
+              const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+              const hasVisit = !!visitsByDate[dateStr];
+              const isToday = dateStr === todayStr;
+              const isSelected = dateStr === selectedDay;
+              const isFuture = dateStr > todayStr;
+              return (
+                <div key={day} onClick={() => !isFuture && setSelectedDay(isSelected ? null : dateStr)}
+                  style={{ textAlign: "center", padding: "6px 2px", borderRadius: 8, cursor: isFuture ? "default" : "pointer", background: isSelected ? "#E30613" : isToday ? "#fff0f0" : "transparent", border: isToday && !isSelected ? "1.5px solid #E30613" : "1.5px solid transparent", position: "relative", transition: "all 0.15s" }}>
+                  <div style={{ fontSize: 13, fontWeight: isToday ? 800 : 400, color: isSelected ? "#fff" : isFuture ? "#ccc" : "#1a1a1a" }}>{day}</div>
+                  {hasVisit && <div style={{ width: 5, height: 5, borderRadius: "50%", background: isSelected ? "#fff" : "#E30613", margin: "2px auto 0" }} />}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* SELECTED DAY VISITS */}
+      {selectedDay && (
+        <div className="card" style={{ marginBottom: 16 }}>
+          <div className="card-header">
+            <div className="card-title">{new Date(selectedDay + "T12:00:00").toLocaleDateString("fr-BE", { weekday: "long", day: "numeric", month: "long" })}</div>
+            <span style={{ fontSize: 12, color: "#999" }}>{dayVisits.length} visite{dayVisits.length !== 1 ? "s" : ""}</span>
+          </div>
+          <div className="card-body" style={{ padding: "8px 0" }}>
+            {dayVisits.length === 0 && <div style={{ padding: "12px 20px", color: "#999", fontSize: 14 }}>Aucune visite ce jour</div>}
+            {dayVisits.map((v, i) => {
+              const rest = getRest(v.restaurantId);
+              const cats = Object.entries(v.categories || {}).filter(([, val]) => val);
+              return (
+                <div key={v.id} style={{ padding: "10px 20px", borderBottom: i < dayVisits.length - 1 ? "1px solid #f0f0f0" : "none" }}>
+                  <div style={{ fontWeight: 700, fontSize: 14 }}>{rest?.name || "Restaurant inconnu"}</div>
+                  <div style={{ fontSize: 12, color: "#999", marginTop: 2 }}>{v.consultantName} · {cats.length} catégorie{cats.length !== 1 ? "s" : ""}</div>
+                  {cats.length > 0 && <div style={{ fontSize: 12, color: "#666", marginTop: 4 }}>{cats.map(([k]) => k).join(" · ")}</div>}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       <div className="card" style={{ marginBottom: 16 }}>
         <div className="card-body">
           <div style={{ fontSize: 11, fontWeight: 700, color: "#999", textTransform: "uppercase", letterSpacing: "0.8px", marginBottom: 8 }}>😄 Blague du jour</div>
@@ -568,7 +655,7 @@ function App() {
         
         <main className="main">
           {view === "home" && (
-            <HomeView currentUser={currentUser} onNavigate={setView} />
+            <HomeView currentUser={currentUser} onNavigate={setView} visits={myVisits} restaurants={restaurants} />
           )}
           {view === "restaurants" && (
             <RestaurantsView restaurants={filteredRests} allRestaurants={restaurants} visits={filteredVisits} actions={filteredActions} searchQ={searchQ} setSearchQ={setSearchQ} managerFilter={managerFilter} setManagerFilter={setManagerFilter} managers={managers} isAdmin={currentUser.role === "admin"} onRestClick={handleRestClick} onGoToActions={() => setView("actions")} onGoToVisits={() => setView("visits")} />
