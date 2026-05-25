@@ -187,9 +187,6 @@ function App() {
       </div>
     </div></>
   );
-  const [showQuickVisit, setShowQuickVisit] = useState(false);
-  const [quickVisitRestId, setQuickVisitRestId] = useState("");
-
   if (!currentUser) return <><style>{styles}</style><LoginScreen onLogin={setCurrentUser} /></>;
 
   return (
