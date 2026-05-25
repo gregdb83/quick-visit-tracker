@@ -325,6 +325,9 @@ export default function App() {
     loadAll();
   }, []);
 
+  const [showQuickVisit, setShowQuickVisit] = useState(false);
+  const [quickVisitRestId, setQuickVisitRestId] = useState("");
+
   useEffect(() => { if (currentUser) saveUser(currentUser); }, [currentUser]);
 
   const myRestaurants = currentUser?.role === "admin" ? restaurants :
@@ -439,9 +442,6 @@ export default function App() {
       </div>
     </div></>
   );
-  const [showQuickVisit, setShowQuickVisit] = useState(false);
-  const [quickVisitRestId, setQuickVisitRestId] = useState("");
-
   if (!currentUser) return <><style>{styles}</style><LoginScreen onLogin={setCurrentUser} /></>;
 
   return (
