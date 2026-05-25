@@ -308,10 +308,11 @@ export default function App() {
   const [searchQ, setSearchQ] = useState("");
   const [managerFilter, setManagerFilter] = useState("all");
   const [actionStatusFilter, setActionStatusFilter] = useState("all");
-  const [showEmailModal, setShowEmailModal] = useState(false);
   const [editingAction, setEditingAction] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [showQuickVisit, setShowQuickVisit] = useState(false);
+  const [quickVisitRestId, setQuickVisitRestId] = useState("");
 
   useEffect(() => {
     const loadAll = async () => {
@@ -324,9 +325,6 @@ export default function App() {
     };
     loadAll();
   }, []);
-
-  const [showQuickVisit, setShowQuickVisit] = useState(false);
-  const [quickVisitRestId, setQuickVisitRestId] = useState("");
 
   useEffect(() => { if (currentUser) saveUser(currentUser); }, [currentUser]);
 
