@@ -39,6 +39,7 @@ const db = {
 };
 
 const CATEGORIES = ["Franchisé & Manager","Ventes & Canaux","Concurrence","Hommes & Certification","Qualité","Service","Propreté","Baromètres","Technique","Tests & Projets"];
+const FOCUS_POINTS = ["Holding Patati","Panneau Briefing","Heures Delivery","NPS/Google"];
 const USERS = [
   { id: "admin", name: "Gregory De Broux", firstName: "Gregory", email: "gregory@quick.be", role: "admin", manager: "all" },
   { id: "u1", name: "Alexandre Wauters", firstName: "Alexandre", email: "alexandre.wauters@quick.be", role: "consultant", manager: "Alexandre Wauters" },
@@ -171,6 +172,20 @@ function HomeView({ currentUser, onNavigate, visits, restaurants }) {
         <div className="card-body">
           <div style={{ fontSize: 11, fontWeight: 700, color: "#999", textTransform: "uppercase", letterSpacing: "0.8px", marginBottom: 8 }}>😄 Blague du jour</div>
           <div style={{ fontSize: 14, color: "#1a1a1a", lineHeight: 1.6 }}>{todayJoke}</div>
+        </div>
+      </div>
+
+      <div className="card" style={{ marginBottom: 16, border: "1.5px solid #FFD200" }}>
+        <div className="card-body" style={{ background: "#FFF8E1", borderRadius: 11 }}>
+          <div style={{ fontSize: 11, fontWeight: 800, color: "#B8860B", textTransform: "uppercase", letterSpacing: "0.8px", marginBottom: 10 }}>⚡ Points focus à ne pas oublier</div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+            {FOCUS_POINTS.map(point => (
+              <div key={point} style={{ display: "flex", alignItems: "center", gap: 8, background: "#fff", borderRadius: 8, padding: "8px 10px", border: "1px solid #FFE082" }}>
+                <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#FFD200", flexShrink: 0 }} />
+                <span style={{ fontSize: 12, fontWeight: 700, color: "#666" }}>{point}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
