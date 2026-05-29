@@ -1,5 +1,4 @@
 
-const FOCUS_POINTS = ["Holding Patati","Panneau Briefing","Heures Delivery","NPS/Google"];
 const DEPARTMENTS = ["Baromètres","Construct","Coordination","Finance","IT","Legal","Marketing","Ops","Ops Exc.","Qualité","Real Estate","RH","Supply","Technique","Training"];
 
 function WeeklyView({ currentUser }) {
