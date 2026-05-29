@@ -66,7 +66,7 @@ function App() {
       setLoading(true);
       const [rests, vis, acts] = await Promise.all([db.restaurants.getAll(), db.visits.getAll(), db.actions.getAll()]);
       if (rests) setRestaurants(rests.map(r => ({ ...r, contractType: r.contract_type, franchiseeEmail: r.franchisee_email, franchiseePhone: r.franchisee_phone, companyName: r.company_name })));
-      if (vis) setVisits(vis.map(v => ({ ...v, restaurantId: v.restaurant_id, consultantId: v.consultant_id, consultantName: v.consultant_name, createdAt: v.created_at })));
+      if (vis) setVisits(vis.map(v => ({ ...v, restaurantId: v.restaurant_id, consultantId: v.consultant_id, consultantName: v.consultant_name, createdAt: v.created_at, focusPoints: v.focus_points || [] })));
       if (acts) setActions(acts.map(a => ({ ...a, restaurantId: a.restaurant_id, consultantId: a.consultant_id, consultantName: a.consultant_name, createdAt: a.created_at })));
       setLoading(false);
     };
@@ -116,19 +116,19 @@ function App() {
   const handleRestClick = (id) => { setSelectedRestId(id); setRestTab("visits"); setView("restaurant"); setSelectedVisit(null); };
 
   const handleSaveVisit = async (visitData) => {
-    const { inlineActions, ...vData } = visitData;
+    const { inlineActions, focusPoints, ...vData } = visitData;
     let visitId;
     if (editingVisit) {
       visitId = editingVisit.id;
-      await db.visits.update(visitId, { date: vData.date, categories: vData.categories });
-      setVisits(prev => prev.map(v => v.id === visitId ? { ...v, ...vData } : v));
+      await db.visits.update(visitId, { date: vData.date, categories: vData.categories, focus_points: focusPoints || [] });
+      setVisits(prev => prev.map(v => v.id === visitId ? { ...v, ...vData, focusPoints: focusPoints || [] } : v));
       await sb(`actions?visit_id=eq.${visitId}`, { method: "DELETE", prefer: "" });
       setActions(prev => prev.filter(a => a.visitId !== visitId));
     } else {
       visitId = Date.now().toString();
-      const newVisit = { id: visitId, restaurant_id: selectedRestId, consultant_id: currentUser.id, consultant_name: currentUser.name, date: vData.date, categories: vData.categories };
+      const newVisit = { id: visitId, restaurant_id: selectedRestId, consultant_id: currentUser.id, consultant_name: currentUser.name, date: vData.date, categories: vData.categories, focus_points: focusPoints || [] };
       await db.visits.insert(newVisit);
-      setVisits(prev => [...prev, { ...newVisit, restaurantId: selectedRestId, consultantId: currentUser.id, consultantName: currentUser.name, createdAt: new Date().toISOString() }]);
+      setVisits(prev => [...prev, { ...newVisit, restaurantId: selectedRestId, consultantId: currentUser.id, consultantName: currentUser.name, focusPoints: focusPoints || [], createdAt: new Date().toISOString() }]);
     }
     if (inlineActions) {
       const newActs = Object.entries(inlineActions)
