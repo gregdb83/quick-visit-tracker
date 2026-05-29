@@ -1,4 +1,133 @@
 
+const DEPARTMENTS = ["Baromètres","Construct","Coordination","Finance","IT","Legal","Marketing","Ops","Ops Exc.","Qualité","Real Estate","RH","Supply","Technique","Training"];
+
+function WeeklyView({ currentUser }) {
+  const [notes, setNotes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [newText, setNewText] = useState("");
+  const [newDept, setNewDept] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
+
+  useEffect(() => {
+    const load = async () => {
+      setLoading(true);
+      const data = await sb(`weekly_notes?select=*&consultant_id=eq.${currentUser.id}&order=created_at.desc`);
+      if (data) setNotes(data);
+      setLoading(false);
+    };
+    load();
+  }, []);
+
+  const addNote = async () => {
+    if (!newText.trim()) return;
+    setSaving(true);
+    const note = { id: Date.now().toString(), consultant_id: currentUser.id, consultant_name: currentUser.name, department: newDept || null, text: newText.trim(), created_at: new Date().toISOString() };
+    const res = await sb("weekly_notes", { method: "POST", body: JSON.stringify(note) });
+    if (res) setNotes(prev => [note, ...prev]);
+    setNewText("");
+    setNewDept("");
+    setSaving(false);
+  };
+
+  const deleteNote = async (id) => {
+    await sb(`weekly_notes?id=eq.${id}`, { method: "DELETE", prefer: "" });
+    setNotes(prev => prev.filter(n => n.id !== id));
+    setDeleteConfirm(null);
+  };
+
+  // Group by department
+  const grouped = {};
+  const noDept = [];
+  notes.forEach(n => {
+    if (n.department) {
+      if (!grouped[n.department]) grouped[n.department] = [];
+      grouped[n.department].push(n);
+    } else {
+      noDept.push(n);
+    }
+  });
+
+  return (
+    <div>
+      <div className="page-header" style={{ marginBottom: 16 }}>
+        <div className="page-title">📋 Weekly</div>
+        <div style={{ fontSize: 13, color: "#666", fontWeight: 600 }}>{notes.length} note{notes.length !== 1 ? "s" : ""}</div>
+      </div>
+
+      {/* Add note form */}
+      <div className="card" style={{ marginBottom: 20 }}>
+        <div className="card-body">
+          <div className="form-group">
+            <label className="form-label">Département (optionnel)</label>
+            <select className="form-select" value={newDept} onChange={e => setNewDept(e.target.value)}>
+              <option value="">Sans département</option>
+              {DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
+            </select>
+          </div>
+          <div className="form-group" style={{ marginBottom: 10 }}>
+            <label className="form-label">Note</label>
+            <textarea className="form-textarea" placeholder="Ajouter une note pour la réunion hebdomadaire..." value={newText} onChange={e => setNewText(e.target.value)} rows={3} />
+          </div>
+          <button className="btn-primary" onClick={addNote} disabled={saving || !newText.trim()}>
+            {saving ? "Ajout..." : "+ Ajouter la note"}
+          </button>
+        </div>
+      </div>
+
+      {loading && <div className="empty"><div className="empty-text">Chargement...</div></div>}
+      {!loading && notes.length === 0 && <div className="empty"><div className="empty-icon"><Icon name="visit" size={40} /></div><div className="empty-text">Aucune note pour le moment</div></div>}
+
+      {/* Notes sans département */}
+      {noDept.length > 0 && (
+        <div style={{ marginBottom: 20 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: "#999", textTransform: "uppercase", letterSpacing: "0.8px", marginBottom: 8 }}>Général</div>
+          {noDept.map(n => (
+            <div key={n.id} className="card" style={{ marginBottom: 8 }}>
+              <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", padding: "14px 18px", gap: 8 }}>
+                <p style={{ fontSize: 14, lineHeight: 1.6, flex: 1 }}>{n.text}</p>
+                <button className="btn-icon" onClick={() => setDeleteConfirm(n)}><Icon name="trash" size={14} color="#E53935" /></button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Notes par département */}
+      {Object.entries(grouped).sort(([a],[b]) => a.localeCompare(b)).map(([dept, deptNotes]) => (
+        <div key={dept} style={{ marginBottom: 20 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, paddingBottom: 6, borderBottom: "2px solid #eee" }}>
+            <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 17, fontWeight: 800, color: "#E30613" }}>{dept}</div>
+            <span style={{ fontSize: 12, color: "#999" }}>{deptNotes.length} note{deptNotes.length > 1 ? "s" : ""}</span>
+          </div>
+          {deptNotes.map(n => (
+            <div key={n.id} className="card" style={{ marginBottom: 8, borderLeft: "4px solid #E30613" }}>
+              <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", padding: "14px 18px", gap: 8 }}>
+                <p style={{ fontSize: 14, lineHeight: 1.6, flex: 1 }}>{n.text}</p>
+                <button className="btn-icon" onClick={() => setDeleteConfirm(n)}><Icon name="trash" size={14} color="#E53935" /></button>
+              </div>
+            </div>
+          ))}
+        </div>
+      ))}
+
+      {/* Delete confirm modal */}
+      {deleteConfirm && (
+        <div className="modal-overlay">
+          <div className="modal" style={{ maxWidth: 340 }}>
+            <div className="modal-title" style={{ fontSize: 18 }}>🗑️ Supprimer cette note ?</div>
+            <p style={{ fontSize: 14, color: "#666", lineHeight: 1.6, marginBottom: 20 }}>Cette suppression est <strong>irréversible</strong>.</p>
+            <div style={{ display: "flex", gap: 10 }}>
+              <button className="btn-secondary" style={{ flex: 1, justifyContent: "center" }} onClick={() => setDeleteConfirm(null)}>Annuler</button>
+              <button className="btn-primary" style={{ flex: 1, background: "#E53935" }} onClick={() => deleteNote(deleteConfirm.id)}>Supprimer</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function VisitDetail({ visit, actions, restaurant, onBack, onEdit, onDelete, onNewAction, onEditAction, onDeleteAction, onUpdateStatus }) {
   const cats = Object.entries(visit.categories || {}).filter(([, v]) => v);
   const visitActions = actions.filter(a => a.visitId === visit.id);

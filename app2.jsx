@@ -210,6 +210,7 @@ function App() {
         </header>
 
         <nav className="nav-bar">
+          <div className={`nav-item ${view === "weekly" ? "active" : ""}`} onClick={() => setView("weekly")}><Icon name="visit" size={15} />Weekly</div>
           <div className={`nav-item ${view === "restaurants" ? "active" : ""}`} onClick={() => setView("restaurants")}><Icon name="restaurant" size={15} />Restaurants</div>
           <div className={`nav-item ${view === "visits" ? "active" : ""}`} onClick={() => setView("visits")}><Icon name="visit" size={15} />Visites</div>
           <div className={`nav-item ${view === "actions" ? "active" : ""}`} onClick={() => setView("actions")}>
@@ -228,6 +229,9 @@ function App() {
         <main className="main">
           {view === "home" && (
             <HomeView currentUser={currentUser} onNavigate={setView} visits={myVisits} restaurants={restaurants} />
+          )}
+          {view === "weekly" && (
+            <WeeklyView currentUser={currentUser} />
           )}
           {view === "restaurants" && (
             <RestaurantsView restaurants={filteredRests} allRestaurants={restaurants} visits={filteredVisits} actions={filteredActions} searchQ={searchQ} setSearchQ={setSearchQ} managerFilter={managerFilter} setManagerFilter={setManagerFilter} managers={managers} isAdmin={currentUser.role === "admin"} onRestClick={handleRestClick} onGoToActions={() => setView("actions")} onGoToVisits={() => setView("visits")} />
