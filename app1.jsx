@@ -38,7 +38,7 @@ const db = {
   },
 };
 
-const CATEGORIES = ["Qualité","Service","Propreté","Rush Ready","Baromètres clients","Focus client","Technique","Tour du restaurant","Hommes & certification","Ventes","Tests & projets"];
+const CATEGORIES = ["Franchisé & Manager","Ventes & Canaux","Concurrence","Hommes & Certification","Qualité","Service","Propreté","Baromètres","Technique","Tests & Projets"];
 const USERS = [
   { id: "admin", name: "Gregory De Broux", firstName: "Gregory", email: "gregory@quick.be", role: "admin", manager: "all" },
   { id: "u1", name: "Alexandre Wauters", firstName: "Alexandre", email: "alexandre.wauters@quick.be", role: "consultant", manager: "Alexandre Wauters" },
