@@ -660,6 +660,7 @@ function VisitFormModal({ visit, onSave, onClose }) {
   const [date, setDate] = useState(visit?.date || today);
   const [categories, setCategories] = useState(visit?.categories || {});
   const [openCat, setOpenCat] = useState(null);
+  const [focusPoints, setFocusPoints] = useState(visit?.focusPoints || []);
   const [inlineActions, setInlineActions] = useState(() => {
     const init = {};
     CATEGORIES.forEach(cat => {
@@ -670,10 +671,10 @@ function VisitFormModal({ visit, onSave, onClose }) {
 
   const setCat = (cat, val) => setCategories(prev => ({ ...prev, [cat]: val }));
   const toggleAction = (cat) => setInlineActions(prev => ({ ...prev, [cat]: { ...prev[cat], isAction: !prev[cat].isAction } }));
-  const setActionText = (cat, val) => setInlineActions(prev => ({ ...prev, [cat]: { ...prev[cat], text: val } }));
+  const toggleFocus = (point) => setFocusPoints(prev => prev.includes(point) ? prev.filter(p => p !== point) : [...prev, point]);
   const filledCount = CATEGORIES.filter(c => categories[c]?.trim()).length;
 
-  const handleSave = () => { onSave({ date, categories, inlineActions }); };
+  const handleSave = () => { onSave({ date, categories, inlineActions, focusPoints }); };
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -686,6 +687,24 @@ function VisitFormModal({ visit, onSave, onClose }) {
         <div className="form-group">
           <label className="form-label">Date de la visite</label>
           <input type="date" className="form-input" value={date} onChange={e => setDate(e.target.value)} />
+        </div>
+
+        {/* FOCUS POINTS */}
+        <div style={{ background: "#FFF8E1", borderRadius: 10, padding: "12px 14px", marginBottom: 14, border: "1.5px solid #FFD200" }}>
+          <div style={{ fontSize: 11, fontWeight: 800, color: "#B8860B", textTransform: "uppercase", letterSpacing: "0.8px", marginBottom: 10 }}>⚡ Points focus à vérifier</div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+            {FOCUS_POINTS.map(point => {
+              const checked = focusPoints.includes(point);
+              return (
+                <label key={point} onClick={() => toggleFocus(point)} style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", padding: "8px 10px", borderRadius: 8, background: checked ? "#E8F5E9" : "#fff", border: `1.5px solid ${checked ? "#2E7D32" : "#eee"}`, transition: "all 0.15s", userSelect: "none" }}>
+                  <div style={{ width: 18, height: 18, borderRadius: 4, border: `2px solid ${checked ? "#2E7D32" : "#ccc"}`, background: checked ? "#2E7D32" : "#fff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "all 0.15s" }}>
+                    {checked && <span style={{ color: "#fff", fontSize: 12, fontWeight: 900 }}>✓</span>}
+                  </div>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: checked ? "#2E7D32" : "#666" }}>{point}</span>
+                </label>
+              );
+            })}
+          </div>
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
@@ -1133,6 +1152,41 @@ function RapportView({ visits, actions, restaurants, isAdmin, currentUser, onRes
                 <Icon name="back" size={14} color="#ccc" />
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* FOCUS POINTS SECTION */}
+      {filteredVisits.length > 0 && (
+        <div className="card" style={{ marginBottom: 16 }}>
+          <div className="card-header"><div className="card-title">⚡ Points focus — restaurants jamais cochés</div></div>
+          <div className="card-body" style={{ padding: "8px 0" }}>
+            {FOCUS_POINTS.map(point => {
+              const restsCovered = new Set(
+                filteredVisits.filter(v => (v.focusPoints || []).includes(point)).map(v => v.restaurantId)
+              );
+              const restsNotCovered = myRests.filter(r => !restsCovered.has(r.id));
+              return (
+                <div key={point} style={{ padding: "12px 20px", borderBottom: "1px solid #f0f0f0" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: restsNotCovered.length > 0 ? 8 : 0 }}>
+                    <div style={{ fontWeight: 800, fontSize: 14 }}>⚡ {point}</div>
+                    <div style={{ display: "flex", gap: 8 }}>
+                      <span style={{ fontSize: 12, background: "#E8F5E9", color: "#2E7D32", fontWeight: 700, padding: "2px 8px", borderRadius: 10 }}>{restsCovered.size} ✓</span>
+                      <span style={{ fontSize: 12, background: restsNotCovered.length > 0 ? "#FFEBEE" : "#E8F5E9", color: restsNotCovered.length > 0 ? "#E53935" : "#2E7D32", fontWeight: 700, padding: "2px 8px", borderRadius: 10 }}>{restsNotCovered.length} ✗</span>
+                    </div>
+                  </div>
+                  {restsNotCovered.length > 0 && (
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                      {restsNotCovered.map(r => (
+                        <span key={r.id} onClick={() => onRestClick(r.id)} style={{ fontSize: 11, background: "#f5f5f5", border: "1px solid #eee", padding: "3px 8px", borderRadius: 8, cursor: "pointer", color: "#666" }}>
+                          {r.name.replace(" Quick", "")}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
